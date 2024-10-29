@@ -1,0 +1,27 @@
+{
+  "name": "jg-week13",
+  "version": "1.0.0",
+  "description": "Focusing on developing essential skills to implement core features for web services through hands-on practice, building a strong foundation for real-world applications.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --watch index.js",
+    "start:local": "cross-env NODE_ENV=local node --watch index.js",
+    "start:dev": "cross-env NODE_ENV=dev node --watch index.js",
+    "start:prod": "cross-env NODE_ENV=production node --watch index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Hyojeon Yoon",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}
