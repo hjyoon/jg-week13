@@ -1,21 +1,16 @@
 #!/bin/sh
+set -e
 
 input_mode() {
-    printf "Input enviroment, p ( = production ) || d ( = development ) || l ( = local ) : "
+    printf "Input environment, p (= production) || d (= development) || l (= local): "
     read -r ans
-
-    if [ -n "$ans" ]; then
-        process_input_mode "$ans"
-    fi
+    process_input_mode "$ans"
 }
 
 input_force_restart() {
     printf "Force restart all? (y/N): "
     read -r ans
-
-    if [ -n "$ans" ]; then
-        set_force_restart "$ans"
-    fi
+    set_force_restart "${ans:-n}"
 }
 
 process_input_mode() {
@@ -29,15 +24,34 @@ process_input_mode() {
     l)
         set_mode "local"
         ;;
+    *)
+        echo "Invalid input. Please enter 'p', 'd', or 'l'."
+        exit 1
+        ;;
     esac
 }
 
 set_mode() {
-    MODE=$1
+    MODE="$1"
 }
 
 set_force_restart() {
-    FORCE_RESTART=$1
+    FORCE_RESTART="$1"
+}
+
+show_help() {
+    cat <<EOF
+Usage: $(basename "$0") [OPTIONS]
+
+Options:
+  -m, --mode MODE           Set the mode (production, dev, local).
+  -f, --force-restart       Force restart all processes.
+      --help                Display this help and exit.
+
+Examples:
+  $(basename "$0") -m production
+  $(basename "$0") --mode=dev --force-restart
+EOF
 }
 
 run_interactive() {
@@ -46,35 +60,40 @@ run_interactive() {
 
 OPTIONS_SET=false
 
-while getopts ':-:m:f' opt; do
-    case "$opt" in
-    m)
+while [ $# -gt 0 ]; do
+    case "$1" in
+    -m | --mode)
         OPTIONS_SET=true
-        if [ "$(echo "$OPTARG" | cut -c 1)" = "-" ]; then
-            print_err_missing_argument "$opt"
+        if [ -n "$2" ]; then
+            set_mode "$2"
+            shift
+        else
+            echo "Option '$1' requires an argument."
             exit 1
         fi
-        set_mode "$OPTARG"
         ;;
-    f)
+    --mode=*)
+        OPTIONS_SET=true
+        set_mode "${1#*=}"
+        ;;
+    -f | --force-restart)
         OPTIONS_SET=true
         set_force_restart "y"
         ;;
-    -)
-        OPTIONS_SET=true
-        # handle_long_option "$OPTARG" "$opt"
+    --help)
+        show_help
+        exit 0
         ;;
-    \?)
-        echo "$(basename "$0"): unrecognized option '-$OPTARG'."
+    -*)
+        echo "$(basename "$0"): unrecognized option '$1'."
         echo "Try '$(basename "$0") --help' for more information."
-        # print_err_invalid_option "$OPTARG"
         exit 1
         ;;
-    :)
-        print_err_missing_argument "$OPTARG"
-        exit 1
+    *)
+        # If other arguments are required, they are handled here.
         ;;
     esac
+    shift
 done
 
 if [ "$OPTIONS_SET" = false ]; then
@@ -84,7 +103,6 @@ fi
 if [ -z "$MODE" ]; then
     echo "$(basename "$0"): '-m' or '--mode' option is required."
     echo "Try '$(basename "$0") --help' for more information."
-    # print_err_missing_option "--user"
     exit 1
 fi
 
@@ -98,21 +116,18 @@ APP_NAME="jg-week13"
 
 cd "$(dirname "$0")" || exit
 
-if ! which npm; then
+if ! command -v npm >/dev/null 2>&1; then
     echo "Cannot run script: npm not installed."
     exit 1
 fi
 
 npm i
 
-if ! which pm2; then
+if ! command -v pm2 >/dev/null 2>&1; then
     npm i pm2 -g
 fi
 
-pm2 describe $APP_NAME >/dev/null
-RUNNING=$?
-
-if [ $RUNNING -eq 0 ]; then
+if pm2 describe "$APP_NAME" >/dev/null 2>&1; then
     if [ -z "$FORCE_RESTART" ]; then
         input_force_restart
     fi
@@ -121,7 +136,7 @@ if [ $RUNNING -eq 0 ]; then
         pm2 delete $APP_NAME
         pm2 start ecosystem.json --only $APP_NAME --env "$MODE"
     else
-        echo "is already running, reloading..."
+        echo "'$APP_NAME' is already running, reloading..."
         pm2 reload ecosystem.json --only $APP_NAME --env "$MODE"
     fi
 else
