@@ -1,0 +1,11 @@
+#!/bin/sh
+
+FILE=".env"
+
+if git diff --cached --name-only | grep -q "$FILE"; then
+    echo "Encrypting $FILE with Ansible Vault..."
+
+    ./encrypt-env.sh
+
+    git add "$FILE"
+fi
