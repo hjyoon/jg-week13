@@ -36,3 +36,9 @@ export function resServerError(res) {
 export function resNotImplemented(res) {
   res.status(501).json(buildResponse(CODE_0, { message: "Not Implemented" }));
 }
+
+export function resServiceUnavailable(res) {
+  res
+    .status(503)
+    .json(buildResponse(CODE_0, { message: "Service Unavailable" }));
+}

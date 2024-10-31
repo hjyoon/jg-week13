@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import { resNotFound, resServerError } from "./utils/response.js";
-import { logError } from "./utils/logger.js";
 import { httpConfig } from "./config/var.js";
+import { checkMongoDBConnection } from "./db/db.js";
 
 const app = express();
 
@@ -30,8 +30,13 @@ app.get("/liveness", (req, res) => {
   res.send("Service is up");
 });
 
-app.get("/readiness", (req, res) => {
-  res.send("Service is ready");
+app.get("/readiness", async (req, res) => {
+  const isMongoDBConnected = await checkMongoDBConnection();
+  if (isMongoDBConnected) {
+    res.send("Service is ready");
+  } else {
+    resServiceUnavailable(res);
+  }
 });
 
 app.use((req, res, next) => {
@@ -39,7 +44,7 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  logError(err);
+  console.error(err);
   resServerError(res);
 });
 
