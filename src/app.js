@@ -6,6 +6,7 @@ import { httpConfig } from "./config/var.js";
 import { checkMongoDBConnection } from "./db/db.js";
 import postRouter from "./routes/posts.js";
 import commentRouter from "./routes/comments.js";
+import authRouter from "./routes/auth.js";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/posts", postRouter);
 app.use("/api/posts/:post_id/comments", commentRouter);
+app.use("/api/auth", authRouter);
 
 app.get("/", (req, res) => {
   res.send("OK");
