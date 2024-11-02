@@ -13,8 +13,6 @@ if [ -f "$FILE" ]; then
     ansible-vault decrypt "$FILE" --vault-password-file=/tmp/vault_password
 
     rm /tmp/vault_password
-
-    echo "Decryption successful: $FILE"
 else
     echo "No encrypted .env file found."
 fi
