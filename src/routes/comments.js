@@ -17,7 +17,7 @@ router.get("/", async (req, res, next) => {
       .toArray();
     res.status(200).json(buildResponse(CODE_1, { data: comments }));
   } catch (e) {
-    next();
+    next(e);
   }
 });
 
@@ -35,7 +35,7 @@ router.post("/", async (req, res, next) => {
       .insertOne({ post_id, content, created_at: new Date() });
     res.status(201).json(CODE_1);
   } catch (e) {
-    next();
+    next(e);
   }
 });
 
@@ -59,7 +59,7 @@ router.put("/:comment_id", async (req, res, next) => {
     }
     res.status(200).json(CODE_1);
   } catch (e) {
-    next();
+    next(e);
   }
 });
 
@@ -76,7 +76,7 @@ router.delete("/:comment_id", async (req, res, next) => {
     }
     noContent(res);
   } catch (e) {
-    next();
+    next(e);
   }
 });
 

@@ -21,7 +21,7 @@ router.get("/", async (req, res, next) => {
       .toArray();
     res.status(200).json(buildResponse(CODE_1, { data: posts }));
   } catch (e) {
-    next();
+    next(e);
   }
 });
 
@@ -38,7 +38,7 @@ router.post("/", async (req, res, next) => {
       .insertOne({ title, author, password, content, created_at: new Date() });
     res.status(201).json(CODE_1);
   } catch (e) {
-    next();
+    next(e);
   }
 });
 
@@ -54,7 +54,7 @@ router.get("/:post_id", async (req, res, next) => {
     }
     res.status(200).json(buildResponse(CODE_1, { data: post }));
   } catch (e) {
-    next();
+    next(e);
   }
 });
 
@@ -80,7 +80,7 @@ router.put("/:post_id", async (req, res, next) => {
       .updateOne({ _id: new ObjectId(post_id) }, { $set: { title, content } });
     res.status(200).json(CODE_1);
   } catch (e) {
-    next();
+    next(e);
   }
 });
 
@@ -101,7 +101,7 @@ router.delete("/:post_id", async (req, res, next) => {
     await db.collection("posts").deleteOne({ _id: new ObjectId(post_id) });
     noContent(res);
   } catch (e) {
-    next();
+    next(e);
   }
 });
 
