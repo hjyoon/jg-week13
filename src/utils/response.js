@@ -9,6 +9,10 @@ export function buildResponse(codeObj, payload) {
   return res;
 }
 
+export function noContent(res) {
+  res.status(204).send();
+}
+
 export function resUnauthorized(res) {
   res.status(401).json(buildResponse(CODE_0, { message: "Unauthorized" }));
 }

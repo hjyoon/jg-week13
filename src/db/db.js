@@ -33,3 +33,10 @@ export async function checkMongoDBConnection() {
     return false;
   }
 }
+
+export function getDb() {
+  if (!client) {
+    throw new Error("MongoDB client is not connected.");
+  }
+  return client.db("week13");
+}
