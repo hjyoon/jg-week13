@@ -1,13 +1,9 @@
 import express from "express";
 import { ObjectId } from "mongodb";
 import { getDb } from "../db/db.js";
-import {
-  buildResponse,
-  noContent,
-  resForbidden,
-  resNotFound,
-} from "../utils/response.js";
-import { CODE_1, CODE_3 } from "../config/detailCode.js";
+import { buildResponse, noContent, resNotFound } from "../utils/response.js";
+import { CODE_1, CODE_3, CODE_4 } from "../config/detailCode.js";
+import { checkToken } from "../middlewares/authorizer.js";
 
 const router = express.Router();
 
@@ -25,17 +21,22 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
-  const { title, author, password, content } = req.body;
-  if (!title || !author || !password || !content) {
+router.post("/", checkToken, async (req, res, next) => {
+  const { title, content } = req.body;
+  if (!title || !content) {
     return res.status(400).json(CODE_3);
   }
 
+  const user_id = req.locals.decodedToken.userId;
+
   try {
     const db = getDb();
-    await db
-      .collection("posts")
-      .insertOne({ title, author, password, content, created_at: new Date() });
+    await db.collection("posts").insertOne({
+      title,
+      content,
+      user_id: new ObjectId(user_id),
+      created_at: new Date(),
+    });
     res.status(201).json(CODE_1);
   } catch (e) {
     next(e);
@@ -58,12 +59,15 @@ router.get("/:post_id", async (req, res, next) => {
   }
 });
 
-router.put("/:post_id", async (req, res, next) => {
+router.put("/:post_id", checkToken, async (req, res, next) => {
   const { post_id } = req.params;
-  const { password, title, content } = req.body;
+  const { title, content } = req.body;
   if (!title || !content) {
     return res.status(400).json(CODE_3);
   }
+
+  const user_id = req.locals.decodedToken.userId;
+
   try {
     const db = getDb();
     const post = await db
@@ -72,8 +76,8 @@ router.put("/:post_id", async (req, res, next) => {
     if (!post) {
       return resNotFound(res);
     }
-    if (post.password !== password) {
-      return resNotFound(res);
+    if (post.user_id.toString() !== user_id) {
+      return res.status(403).json(CODE_4);
     }
     await db
       .collection("posts")
@@ -84,9 +88,9 @@ router.put("/:post_id", async (req, res, next) => {
   }
 });
 
-router.delete("/:post_id", async (req, res, next) => {
+router.delete("/:post_id", checkToken, async (req, res, next) => {
   const { post_id } = req.params;
-  const { password } = req.body;
+  const user_id = req.locals.decodedToken.userId;
   try {
     const db = getDb();
     const post = await db
@@ -95,8 +99,8 @@ router.delete("/:post_id", async (req, res, next) => {
     if (!post) {
       return resNotFound(res);
     }
-    if (post.password !== password) {
-      return resForbidden();
+    if (post.user_id.toString() !== user_id) {
+      return res.status(403).json(CODE_4);
     }
     await db.collection("posts").deleteOne({ _id: new ObjectId(post_id) });
     noContent(res);
