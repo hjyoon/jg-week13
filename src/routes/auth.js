@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import express from "express";
+import Joi from "joi";
 import { getDb } from "../db/db.js";
 import { EXPIRES_IN, JWT_SECRET, NODE_ENV } from "../config/const.js";
 import { CODE_1, CODE_3, CODE_4 } from "../config/detailCode.js";
@@ -8,25 +9,27 @@ import { buildResponse } from "../utils/response.js";
 
 const router = express.Router();
 
+const registerSchema = Joi.object({
+  nickname: Joi.string().alphanum().min(3).required(),
+  password: Joi.string().min(4).disallow(Joi.ref("nickname")).required(),
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("password"))
+    .required()
+    .messages({ "any.only": "Passwords do not match" }),
+});
+
+const loginSchema = Joi.object({
+  nickname: Joi.string().required(),
+  password: Joi.string().required(),
+});
+
 router.post("/register", async (req, res, next) => {
-  const { nickname, password, confirmPassword } = req.body;
-
-  if (!nickname || !password || !confirmPassword) {
+  const { error } = registerSchema.validate(req.body);
+  if (error) {
     return res.status(400).json(CODE_3);
   }
 
-  const nicknameRegex = /^[a-zA-Z0-9]{3,}$/;
-  if (!nicknameRegex.test(nickname)) {
-    return res.status(400).json(CODE_3);
-  }
-
-  if (password.length < 4 || password.includes(nickname)) {
-    return res.status(400).json(CODE_3);
-  }
-
-  if (password !== confirmPassword) {
-    return res.status(400).json(CODE_3);
-  }
+  const { nickname, password } = req.body;
 
   try {
     const db = await getDb();
@@ -51,11 +54,12 @@ router.post("/register", async (req, res, next) => {
 });
 
 router.post("/login", async (req, res, next) => {
-  const { nickname, password } = req.body;
-
-  if (!nickname || !password) {
+  const { error } = loginSchema.validate(req.body);
+  if (error) {
     return res.status(400).json(CODE_3);
   }
+
+  const { nickname, password } = req.body;
 
   try {
     const db = await getDb();

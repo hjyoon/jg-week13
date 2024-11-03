@@ -1,11 +1,26 @@
 import express from "express";
 import { ObjectId } from "mongodb";
+import Joi from "joi";
 import { getDb } from "../db/db.js";
 import { buildResponse, noContent, resNotFound } from "../utils/response.js";
 import { CODE_1, CODE_3, CODE_4 } from "../config/detailCode.js";
 import { checkToken } from "../middlewares/authorizer.js";
 
 const router = express.Router();
+
+const postSchema = Joi.object({
+  title: Joi.string().min(1).required(),
+  content: Joi.string().min(1).required(),
+});
+
+const postIdSchema = Joi.object({
+  post_id: Joi.string().custom((value, helpers) => {
+    if (!ObjectId.isValid(value)) {
+      return helpers.message("Invalid post ID format");
+    }
+    return value;
+  }, "ObjectId Validation"),
+});
 
 router.get("/", async (req, res, next) => {
   try {
@@ -46,11 +61,12 @@ router.get("/", async (req, res, next) => {
 });
 
 router.post("/", checkToken, async (req, res, next) => {
-  const { title, content } = req.body;
-  if (!title || !content) {
+  const { error } = postSchema.validate(req.body);
+  if (error) {
     return res.status(400).json(CODE_3);
   }
 
+  const { title, content } = req.body;
   const user_id = req.locals.decodedToken.userId;
 
   try {
@@ -68,7 +84,13 @@ router.post("/", checkToken, async (req, res, next) => {
 });
 
 router.get("/:post_id", async (req, res, next) => {
+  const { error } = postIdSchema.validate(req.params);
+  if (error) {
+    return res.status(400).json(CODE_3);
+  }
+
   const { post_id } = req.params;
+
   try {
     const db = getDb();
     const post = await db
@@ -110,12 +132,19 @@ router.get("/:post_id", async (req, res, next) => {
 });
 
 router.put("/:post_id", checkToken, async (req, res, next) => {
-  const { post_id } = req.params;
-  const { title, content } = req.body;
-  if (!title || !content) {
+  const { error: paramError } = postIdSchema.validate(req.params);
+  const { error: bodyError } = postSchema.validate(req.body);
+
+  if (paramError) {
     return res.status(400).json(CODE_3);
   }
 
+  if (bodyError) {
+    return res.status(400).json(CODE_3);
+  }
+
+  const { post_id } = req.params;
+  const { title, content } = req.body;
   const user_id = req.locals.decodedToken.userId;
 
   try {
@@ -139,8 +168,14 @@ router.put("/:post_id", checkToken, async (req, res, next) => {
 });
 
 router.delete("/:post_id", checkToken, async (req, res, next) => {
+  const { error } = postIdSchema.validate(req.params);
+  if (error) {
+    return res.status(400).json(CODE_3);
+  }
+
   const { post_id } = req.params;
   const user_id = req.locals.decodedToken.userId;
+
   try {
     const db = getDb();
     const post = await db
