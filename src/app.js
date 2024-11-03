@@ -2,12 +2,14 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
 import { resNotFound, resServerError } from "./utils/response.js";
 import { httpConfig } from "./config/var.js";
 import { checkMongoDBConnection } from "./db/db.js";
 import postRouter from "./routes/posts.js";
 import commentRouter from "./routes/comments.js";
 import authRouter from "./routes/auth.js";
+import swaggerDocument from "../swagger.json" assert { type: "json" };
 
 const app = express();
 
@@ -26,6 +28,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/posts", postRouter);
 app.use("/api/posts/:post_id/comments", commentRouter);
