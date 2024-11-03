@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import express from "express";
 import Joi from "joi";
-import { getDb } from "../db/db.js";
+import User from "../db/models/user.js";
 import { EXPIRES_IN, JWT_SECRET, NODE_ENV } from "../config/const.js";
 import { CODE_1, CODE_3, CODE_4 } from "../config/detailCode.js";
 import { buildResponse } from "../utils/response.js";
@@ -32,9 +32,7 @@ router.post("/register", async (req, res, next) => {
   const { nickname, password } = req.body;
 
   try {
-    const db = await getDb();
-
-    const existingUser = await db.collection("users").findOne({ nickname });
+    const existingUser = await User.findOne({ nickname });
     if (existingUser) {
       return res.status(400).json({ message: "This is a duplicate nickname" });
     }
@@ -43,9 +41,13 @@ router.post("/register", async (req, res, next) => {
     const passwordHash = crypto
       .pbkdf2Sync(password, salt, 1000, 64, `sha256`)
       .toString(`hex`);
-    await db
-      .collection("users")
-      .insertOne({ nickname, password: passwordHash, salt });
+
+    const newUser = new User({
+      nickname,
+      password: passwordHash,
+      salt,
+    });
+    await newUser.save();
 
     res.status(201).json(CODE_1);
   } catch (e) {
@@ -62,9 +64,7 @@ router.post("/login", async (req, res, next) => {
   const { nickname, password } = req.body;
 
   try {
-    const db = await getDb();
-
-    const user = await db.collection("users").findOne({ nickname });
+    const user = await User.findOne({ nickname });
     if (!user) {
       return res.status(400).json(CODE_4);
     }

@@ -1,7 +1,7 @@
 import express from "express";
 import { ObjectId } from "mongodb";
 import Joi from "joi";
-import { getDb } from "../db/db.js";
+import Post from "../db/models/post.js";
 import { buildResponse, noContent, resNotFound } from "../utils/response.js";
 import { CODE_1, CODE_3, CODE_4 } from "../config/detailCode.js";
 import { checkToken } from "../middlewares/authorizer.js";
@@ -24,36 +24,10 @@ const postIdSchema = Joi.object({
 
 router.get("/", async (req, res, next) => {
   try {
-    const db = getDb();
-    const posts = await db
-      .collection("posts")
-      .aggregate([
-        {
-          $lookup: {
-            from: "users",
-            localField: "user_id",
-            foreignField: "_id",
-            as: "author",
-          },
-        },
-        {
-          $unwind: "$author",
-        },
-        {
-          $project: {
-            _id: 1,
-            title: 1,
-            content: 1,
-            created_at: 1,
-            "author._id": "$author._id",
-            "author.nickname": "$author.nickname",
-          },
-        },
-        {
-          $sort: { created_at: -1 },
-        },
-      ])
-      .toArray();
+    const posts = await Post.find()
+      .populate("user_id", "nickname")
+      .sort({ created_at: -1 })
+      .select("title content created_at user_id");
     res.status(200).json(buildResponse(CODE_1, { data: posts }));
   } catch (e) {
     next(e);
@@ -70,13 +44,13 @@ router.post("/", checkToken, async (req, res, next) => {
   const user_id = req.locals.decodedToken.userId;
 
   try {
-    const db = getDb();
-    await db.collection("posts").insertOne({
+    const post = new Post({
       title,
       content,
-      user_id: new ObjectId(user_id),
+      user_id,
       created_at: new Date(),
     });
+    await post.save();
     res.status(201).json(CODE_1);
   } catch (e) {
     next(e);
@@ -92,36 +66,9 @@ router.get("/:post_id", async (req, res, next) => {
   const { post_id } = req.params;
 
   try {
-    const db = getDb();
-    const post = await db
-      .collection("posts")
-      .aggregate([
-        {
-          $match: { _id: new ObjectId(post_id) },
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "user_id",
-            foreignField: "_id",
-            as: "author",
-          },
-        },
-        {
-          $unwind: "$author",
-        },
-        {
-          $project: {
-            _id: 1,
-            title: 1,
-            content: 1,
-            created_at: 1,
-            "author._id": "$author._id",
-            "author.nickname": "$author.nickname",
-          },
-        },
-      ])
-      .next();
+    const post = await Post.findById(post_id)
+      .populate("user_id", "nickname")
+      .select("title content created_at user_id");
     if (!post) {
       return resNotFound(res);
     }
@@ -148,19 +95,18 @@ router.put("/:post_id", checkToken, async (req, res, next) => {
   const user_id = req.locals.decodedToken.userId;
 
   try {
-    const db = getDb();
-    const post = await db
-      .collection("posts")
-      .findOne({ _id: new ObjectId(post_id) });
+    const post = await Post.findById(post_id);
     if (!post) {
       return resNotFound(res);
     }
+
     if (post.user_id.toString() !== user_id) {
       return res.status(403).json(CODE_4);
     }
-    await db
-      .collection("posts")
-      .updateOne({ _id: new ObjectId(post_id) }, { $set: { title, content } });
+
+    post.title = title;
+    post.content = content;
+    await post.save();
     res.status(200).json(CODE_1);
   } catch (e) {
     next(e);
@@ -177,17 +123,14 @@ router.delete("/:post_id", checkToken, async (req, res, next) => {
   const user_id = req.locals.decodedToken.userId;
 
   try {
-    const db = getDb();
-    const post = await db
-      .collection("posts")
-      .findOne({ _id: new ObjectId(post_id) });
-    if (!post) {
-      return resNotFound(res);
-    }
+    const post = await Post.findById(post_id);
+    if (!post) return resNotFound(res);
+
     if (post.user_id.toString() !== user_id) {
       return res.status(403).json(CODE_4);
     }
-    await db.collection("posts").deleteOne({ _id: new ObjectId(post_id) });
+
+    await post.deleteOne({ _id: post_id });
     noContent(res);
   } catch (e) {
     next(e);
