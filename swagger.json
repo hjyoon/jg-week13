@@ -1,10 +1,83 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "API docs",
-    "version": "1.0.0"
+    "title": "API Documentation",
+    "version": "1.0.0",
+    "description": "API documentation for the application."
   },
   "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login a user",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "accessToken=eyJhbGciOiJIUzI1NiIsInR...; HttpOnly"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/posts": {
       "get": {
         "summary": "Get all posts",
@@ -15,31 +88,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "_id": { "type": "string" },
-                          "title": { "type": "string" },
-                          "content": { "type": "string" },
-                          "created_at": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "author": {
-                            "type": "object",
-                            "properties": {
-                              "_id": { "type": "string" },
-                              "nickname": { "type": "string" }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Post" }
                 }
               }
             }
@@ -49,31 +99,46 @@
       "post": {
         "summary": "Create a new post",
         "tags": ["Posts"],
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "title": { "type": "string" },
-                  "content": { "type": "string" }
-                },
-                "required": ["title", "content"]
-              }
+              "schema": { "$ref": "#/components/schemas/PostRequest" }
             }
           }
         },
         "responses": {
-          "201": { "description": "Post created" },
-          "400": { "description": "Invalid input" }
+          "201": {
+            "description": "Post created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
         }
       }
     },
     "/api/posts/{post_id}": {
       "get": {
-        "summary": "Get a single post",
+        "summary": "Get a post by ID",
         "tags": ["Posts"],
         "parameters": [
           {
@@ -85,43 +150,27 @@
         ],
         "responses": {
           "200": {
-            "description": "Post details",
+            "description": "Post found",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "_id": { "type": "string" },
-                        "title": { "type": "string" },
-                        "content": { "type": "string" },
-                        "created_at": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "author": {
-                          "type": "object",
-                          "properties": {
-                            "_id": { "type": "string" },
-                            "nickname": { "type": "string" }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/Post" }
               }
             }
           },
-          "404": { "description": "Post not found" }
+          "404": {
+            "description": "Post not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
         }
       },
       "put": {
         "summary": "Update a post",
         "tags": ["Posts"],
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "post_id",
@@ -134,27 +183,49 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "title": { "type": "string" },
-                  "content": { "type": "string" }
-                },
-                "required": ["title", "content"]
-              }
+              "schema": { "$ref": "#/components/schemas/PostRequest" }
             }
           }
         },
         "responses": {
-          "200": { "description": "Post updated" },
-          "403": { "description": "Forbidden" },
-          "404": { "description": "Post not found" }
+          "200": {
+            "description": "Post updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Post not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
         }
       },
       "delete": {
         "summary": "Delete a post",
         "tags": ["Posts"],
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "post_id",
@@ -164,15 +235,31 @@
           }
         ],
         "responses": {
-          "204": { "description": "No content" },
-          "403": { "description": "Forbidden" },
-          "404": { "description": "Post not found" }
+          "204": {
+            "description": "Post deleted"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Post not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
         }
       }
     },
     "/api/posts/{post_id}/comments": {
       "get": {
-        "summary": "Get all comments for a post",
+        "summary": "Get comments for a post",
         "tags": ["Comments"],
         "parameters": [
           {
@@ -188,31 +275,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "_id": { "type": "string" },
-                          "content": { "type": "string" },
-                          "created_at": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "author": {
-                            "type": "object",
-                            "properties": {
-                              "_id": { "type": "string" },
-                              "nickname": { "type": "string" }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Comment" }
                 }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
               }
             }
           }
@@ -221,7 +294,7 @@
       "post": {
         "summary": "Add a comment to a post",
         "tags": ["Comments"],
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "post_id",
@@ -234,96 +307,313 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "content": { "type": "string" }
-                },
-                "required": ["content"]
-              }
+              "schema": { "$ref": "#/components/schemas/CommentRequest" }
             }
           }
         },
         "responses": {
-          "201": { "description": "Comment created" },
-          "400": { "description": "Invalid input" }
-        }
-      }
-    },
-    "/api/auth/register": {
-      "post": {
-        "summary": "Register a new user",
-        "tags": ["Authentication"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "nickname": { "type": "string" },
-                  "password": { "type": "string" },
-                  "confirmPassword": { "type": "string" }
-                },
-                "required": ["nickname", "password", "confirmPassword"]
+          "201": {
+            "description": "Comment created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
               }
             }
           }
-        },
-        "responses": {
-          "201": { "description": "User registered" },
-          "400": { "description": "Invalid input or duplicate nickname" }
         }
       }
     },
-    "/api/auth/login": {
-      "post": {
-        "summary": "Log in a user",
-        "tags": ["Authentication"],
+    "/api/posts/{post_id}/comments/{comment_id}": {
+      "put": {
+        "summary": "Update a comment",
+        "tags": ["Comments"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "post_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "comment_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "nickname": { "type": "string" },
-                  "password": { "type": "string" }
-                },
-                "required": ["nickname", "password"]
-              }
+              "schema": { "$ref": "#/components/schemas/CommentRequest" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "User logged in",
+            "description": "Comment updated",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "tokenType": { "type": "string" },
-                        "expiresIn": { "type": "integer" },
-                        "accessToken": { "type": "string" }
-                      }
-                    }
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
               }
             }
           },
-          "400": { "description": "Invalid credentials" }
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Comment not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a comment",
+        "tags": ["Comments"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "post_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "comment_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Comment deleted"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Comment not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/liveness": {
+      "get": {
+        "summary": "Liveness probe",
+        "responses": {
+          "200": {
+            "description": "Service is up",
+            "content": {
+              "text/plain": {
+                "schema": { "type": "string", "example": "Service is up" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/readiness": {
+      "get": {
+        "summary": "Readiness probe",
+        "responses": {
+          "200": {
+            "description": "Service is ready",
+            "content": {
+              "text/plain": {
+                "schema": { "type": "string", "example": "Service is ready" }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Service is not ready"
+                }
+              }
+            }
+          }
         }
       }
     }
   },
   "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "nickname": { "type": "string" }
+        },
+        "example": {
+          "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+          "nickname": "johnDoe"
+        }
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "user_id": { "$ref": "#/components/schemas/User" }
+        },
+        "example": {
+          "_id": "60af0b0b0b0b0b0b0b0b0b0b",
+          "title": "First Post",
+          "content": "This is the content of the post",
+          "created_at": "2020-05-01T12:34:56.789Z",
+          "user_id": {
+            "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+            "nickname": "johnDoe"
+          }
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "content": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "post_id": { "type": "string" },
+          "user_id": { "$ref": "#/components/schemas/User" }
+        },
+        "example": {
+          "_id": "60af0b0c0c0c0c0c0c0c0c0c",
+          "content": "Nice post!",
+          "created_at": "2020-05-01T13:34:56.789Z",
+          "post_id": "60af0b0b0b0b0b0b0b0b0b0b",
+          "user_id": {
+            "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+            "nickname": "johnDoe"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "nickname": { "type": "string", "minLength": 3 },
+          "password": { "type": "string", "minLength": 4 },
+          "confirmPassword": { "type": "string" }
+        },
+        "required": ["nickname", "password", "confirmPassword"]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "nickname": { "type": "string" },
+          "password": { "type": "string" }
+        },
+        "required": ["nickname", "password"]
+      },
+      "PostRequest": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "content": { "type": "string", "minLength": 1 }
+        },
+        "required": ["title", "content"]
+      },
+      "CommentRequest": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string", "minLength": 1 }
+        },
+        "required": ["content"]
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "example": "CODE_1" },
+          "message": { "type": "string", "example": "Success" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" }
+        },
+        "example": {
+          "code": "CODE_3",
+          "message": "Validation error"
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "tokenType": { "type": "string" },
+              "expiresIn": { "type": "integer" },
+              "accessToken": { "type": "string" }
+            }
+          }
+        },
+        "example": {
+          "code": "CODE_1",
+          "message": "Success",
+          "data": {
+            "tokenType": "Bearer",
+            "expiresIn": 3600,
+            "accessToken": "eyJhbGciOiJIUzI1NiIsInR..."
+          }
+        }
+      }
+    },
     "securitySchemes": {
-      "bearerAuth": {
+      "BearerAuth": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
