@@ -12,8 +12,32 @@ router.get("/", async (req, res, next) => {
     const db = getDb();
     const posts = await db
       .collection("posts")
-      .find()
-      .sort({ created_at: -1 })
+      .aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "user_id",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $unwind: "$author",
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            content: 1,
+            created_at: 1,
+            "author._id": "$author._id",
+            "author.nickname": "$author.nickname",
+          },
+        },
+        {
+          $sort: { created_at: -1 },
+        },
+      ])
       .toArray();
     res.status(200).json(buildResponse(CODE_1, { data: posts }));
   } catch (e) {
@@ -49,7 +73,33 @@ router.get("/:post_id", async (req, res, next) => {
     const db = getDb();
     const post = await db
       .collection("posts")
-      .findOne({ _id: new ObjectId(post_id) });
+      .aggregate([
+        {
+          $match: { _id: new ObjectId(post_id) },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "user_id",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $unwind: "$author",
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            content: 1,
+            created_at: 1,
+            "author._id": "$author._id",
+            "author.nickname": "$author.nickname",
+          },
+        },
+      ])
+      .next();
     if (!post) {
       return resNotFound(res);
     }

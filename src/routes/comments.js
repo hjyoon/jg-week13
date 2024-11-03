@@ -13,8 +13,34 @@ router.get("/", async (req, res, next) => {
     const db = getDb();
     const comments = await db
       .collection("comments")
-      .find({ post_id })
-      .sort({ created_at: -1 })
+      .aggregate([
+        {
+          $match: { post_id: new ObjectId(post_id) },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "user_id",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $unwind: "$author",
+        },
+        {
+          $project: {
+            _id: 1,
+            content: 1,
+            created_at: 1,
+            "author._id": "$author._id",
+            "author.nickname": "$author.nickname",
+          },
+        },
+        {
+          $sort: { created_at: -1 },
+        },
+      ])
       .toArray();
     res.status(200).json(buildResponse(CODE_1, { data: comments }));
   } catch (e) {
