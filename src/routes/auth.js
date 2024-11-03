@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import express from "express";
 import { getDb } from "../db/db.js";
-import { EXPIRES_IN, JWT_SECRET } from "../config/const.js";
+import { EXPIRES_IN, JWT_SECRET, NODE_ENV } from "../config/const.js";
 import { CODE_1, CODE_3, CODE_4 } from "../config/detailCode.js";
 import { buildResponse } from "../utils/response.js";
 
@@ -77,6 +77,11 @@ router.post("/login", async (req, res, next) => {
       expiresIn: EXPIRES_IN,
     });
 
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: NODE_ENV === "production" ? true : false,
+      maxAge: EXPIRES_IN,
+    });
     res.status(200).json(
       buildResponse(CODE_1, {
         data: { tokenType: "Bearer", expiresIn: EXPIRES_IN, accessToken },
