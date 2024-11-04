@@ -71,7 +71,6 @@ router.post("/", checkToken, async (req, res, next) => {
       content,
       post: post_id,
       author: user_id,
-      created_at: new Date(),
     });
     await comment.save();
     await comment.populate("author", "nickname");
@@ -82,6 +81,7 @@ router.post("/", checkToken, async (req, res, next) => {
           _id: comment._id,
           content: comment.content,
           created_at: comment.created_at,
+          updated_at: comment.updated_at,
           author: comment.author,
           post: comment.post,
         },
@@ -129,6 +129,7 @@ router.put("/:comment_id", checkToken, async (req, res, next) => {
           _id: comment._id,
           content: comment.content,
           created_at: comment.created_at,
+          updated_at: comment.updated_at,
           author: comment.author,
           post: comment.post,
         },

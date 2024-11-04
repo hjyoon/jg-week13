@@ -13,6 +13,14 @@ const commentSchema = new mongoose.Schema({
     required: true,
   },
   created_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now },
+});
+
+commentSchema.pre("save", function (next) {
+  if (this.isModified()) {
+    this.updated_at = Date.now();
+  }
+  next();
 });
 
 export default mongoose.model("Comment", commentSchema);

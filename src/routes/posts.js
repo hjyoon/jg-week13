@@ -48,7 +48,6 @@ router.post("/", checkToken, async (req, res, next) => {
       title,
       content,
       author: user_id,
-      created_at: new Date(),
     });
     await post.save();
     await post.populate("author", "nickname");
@@ -59,6 +58,7 @@ router.post("/", checkToken, async (req, res, next) => {
           title: post.title,
           content: post.content,
           created_at: post.created_at,
+          updated_at: post.updated_at,
           author: post.author,
         },
       })
@@ -125,6 +125,7 @@ router.put("/:post_id", checkToken, async (req, res, next) => {
           title: post.title,
           content: post.content,
           created_at: post.created_at,
+          updated_at: post.updated_at,
           author: post.author,
         },
       })
