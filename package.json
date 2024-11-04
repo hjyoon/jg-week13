@@ -8,7 +8,11 @@
     "start:local": "cross-env NODE_ENV=local node --watch index.js",
     "start:dev": "cross-env NODE_ENV=dev node --watch index.js",
     "start:prod": "cross-env NODE_ENV=production node --watch index.js",
-    "test": "cross-env NODE_ENV=test node --test"
+    "test": "cross-env NODE_ENV=test node --test",
+    "seed:users": "node src/seeds/seedUsers.js",
+    "seed:posts": "node src/seeds/seedPosts.js",
+    "seed:comments": "node src/seeds/seedComments.js",
+    "seed:all": "npm run seed:users && npm run seed:posts && npm run seed:comments"
   },
   "author": "Hyojeon Yoon",
   "license": "ISC",
