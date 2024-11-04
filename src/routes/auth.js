@@ -1,11 +1,11 @@
 import crypto from "node:crypto";
-import jwt from "jsonwebtoken";
 import express from "express";
 import Joi from "joi";
 import User from "../db/models/user.js";
-import { EXPIRES_IN, JWT_SECRET, NODE_ENV } from "../config/const.js";
+import { EXPIRES_IN, NODE_ENV } from "../config/const.js";
 import { CODE_1, CODE_3, CODE_4 } from "../config/detailCode.js";
 import { buildResponse } from "../utils/response.js";
+import { genHashedPassword, genToken } from "../utils/etc.js";
 
 const router = express.Router();
 
@@ -38,9 +38,7 @@ router.post("/register", async (req, res, next) => {
     }
 
     const salt = crypto.randomBytes(16).toString("hex");
-    const passwordHash = crypto
-      .pbkdf2Sync(password, salt, 1000, 64, `sha256`)
-      .toString(`hex`);
+    const passwordHash = genHashedPassword(password, salt);
 
     const newUser = new User({
       nickname,
@@ -69,17 +67,12 @@ router.post("/login", async (req, res, next) => {
       return res.status(400).json(CODE_4);
     }
 
-    const salt = user.salt;
-    const passwordHash = crypto
-      .pbkdf2Sync(password, salt, 1000, 64, "sha256")
-      .toString(`hex`);
+    const passwordHash = genHashedPassword(password, user.salt);
     if (passwordHash !== user.password) {
       return res.status(400).json(CODE_4);
     }
 
-    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, {
-      expiresIn: EXPIRES_IN,
-    });
+    const accessToken = genToken(user._id);
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
