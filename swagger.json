@@ -23,10 +23,16 @@
             "description": "User registered successfully",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" },
+                "schema": { "$ref": "#/components/schemas/RegisterResponse" },
                 "example": {
                   "code": 1,
-                  "message": "Success"
+                  "message": "Success",
+                  "data": {
+                    "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+                    "nickname": "johnDoe",
+                    "created_at": "2020-05-01T12:34:56.789Z",
+                    "updated_at": "2020-05-01T12:34:56.789Z"
+                  }
                 }
               }
             }
@@ -35,11 +41,15 @@
             "description": "Bad Request or Duplicate Nickname",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "schema": {
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/ErrorResponse" },
+                    { "$ref": "#/components/schemas/DuplicateNicknameResponse" }
+                  ]
+                },
                 "examples": {
                   "DuplicateNickname": {
                     "value": {
-                      "code": 3,
                       "message": "This is a duplicate nickname"
                     }
                   },
@@ -140,9 +150,12 @@
                       "title": "First Post",
                       "content": "This is the content of the post",
                       "created_at": "2020-05-01T12:34:56.789Z",
+                      "updated_at": "2020-05-02T12:34:56.789Z",
                       "author": {
                         "_id": "60af0b0a0a0a0a0a0a0a0a0a",
-                        "nickname": "johnDoe"
+                        "nickname": "johnDoe",
+                        "created_at": "2020-05-01T12:34:56.789Z",
+                        "updated_at": "2020-05-01T12:34:56.789Z"
                       }
                     }
                   ]
@@ -190,9 +203,12 @@
                     "title": "First Post",
                     "content": "This is the content of the post",
                     "created_at": "2020-05-01T12:34:56.789Z",
+                    "updated_at": "2020-05-01T12:34:56.789Z",
                     "author": {
                       "_id": "60af0b0a0a0a0a0a0a0a0a0a",
-                      "nickname": "johnDoe"
+                      "nickname": "johnDoe",
+                      "created_at": "2020-05-01T12:34:56.789Z",
+                      "updated_at": "2020-05-01T12:34:56.789Z"
                     }
                   }
                 }
@@ -252,9 +268,12 @@
                     "title": "First Post",
                     "content": "This is the content of the post",
                     "created_at": "2020-05-01T12:34:56.789Z",
+                    "updated_at": "2020-05-02T12:34:56.789Z",
                     "author": {
                       "_id": "60af0b0a0a0a0a0a0a0a0a0a",
-                      "nickname": "johnDoe"
+                      "nickname": "johnDoe",
+                      "created_at": "2020-05-01T12:34:56.789Z",
+                      "updated_at": "2020-05-01T12:34:56.789Z"
                     }
                   }
                 }
@@ -312,10 +331,23 @@
             "description": "Post updated",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" },
+                "schema": { "$ref": "#/components/schemas/PostResponse" },
                 "example": {
                   "code": 1,
-                  "message": "Success"
+                  "message": "Success",
+                  "data": {
+                    "_id": "60af0b0b0b0b0b0b0b0b0b0b",
+                    "title": "Updated Post Title",
+                    "content": "This is the updated content of the post",
+                    "created_at": "2020-05-01T12:34:56.789Z",
+                    "updated_at": "2020-05-02T12:34:56.789Z",
+                    "author": {
+                      "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+                      "nickname": "johnDoe",
+                      "created_at": "2020-05-01T12:34:56.789Z",
+                      "updated_at": "2020-05-01T12:34:56.789Z"
+                    }
+                  }
                 }
               }
             }
@@ -451,10 +483,13 @@
                       "_id": "60af0b0c0c0c0c0c0c0c0c0c",
                       "content": "Nice post!",
                       "created_at": "2020-05-01T13:34:56.789Z",
+                      "updated_at": "2020-05-01T13:34:56.789Z",
                       "post_id": "60af0b0b0b0b0b0b0b0b0b0b",
                       "author": {
                         "_id": "60af0b0a0a0a0a0a0a0a0a0a",
-                        "nickname": "johnDoe"
+                        "nickname": "johnDoe",
+                        "created_at": "2020-05-01T12:34:56.789Z",
+                        "updated_at": "2020-05-01T12:34:56.789Z"
                       }
                     }
                   ]
@@ -521,10 +556,13 @@
                     "_id": "60af0b0c0c0c0c0c0c0c0c0c",
                     "content": "Nice post!",
                     "created_at": "2020-05-01T13:34:56.789Z",
+                    "updated_at": "2020-05-01T13:34:56.789Z",
                     "post_id": "60af0b0b0b0b0b0b0b0b0b0b",
                     "author": {
                       "_id": "60af0b0a0a0a0a0a0a0a0a0a",
-                      "nickname": "johnDoe"
+                      "nickname": "johnDoe",
+                      "created_at": "2020-05-01T12:34:56.789Z",
+                      "updated_at": "2020-05-01T12:34:56.789Z"
                     }
                   }
                 }
@@ -600,10 +638,23 @@
             "description": "Comment updated",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" },
+                "schema": { "$ref": "#/components/schemas/CommentResponse" },
                 "example": {
                   "code": 1,
-                  "message": "Success"
+                  "message": "Success",
+                  "data": {
+                    "_id": "60af0b0c0c0c0c0c0c0c0c0c",
+                    "content": "Updated comment content",
+                    "created_at": "2020-05-01T13:34:56.789Z",
+                    "updated_at": "2020-05-02T13:34:56.789Z",
+                    "post_id": "60af0b0b0b0b0b0b0b0b0b0b",
+                    "author": {
+                      "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+                      "nickname": "johnDoe",
+                      "created_at": "2020-05-01T12:34:56.789Z",
+                      "updated_at": "2020-05-01T12:34:56.789Z"
+                    }
+                  }
                 }
               }
             }
@@ -613,9 +664,19 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" },
-                "example": {
-                  "code": 3,
-                  "message": "Wrong parameter format"
+                "examples": {
+                  "ValidationError": {
+                    "value": {
+                      "code": 3,
+                      "message": "Wrong parameter format"
+                    }
+                  },
+                  "InvalidIDs": {
+                    "value": {
+                      "code": 3,
+                      "message": "Wrong parameter format"
+                    }
+                  }
                 }
               }
             }
@@ -755,51 +816,15 @@
         "type": "object",
         "properties": {
           "_id": { "type": "string" },
-          "nickname": { "type": "string" }
+          "nickname": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
         },
         "example": {
           "_id": "60af0b0a0a0a0a0a0a0a0a0a",
-          "nickname": "johnDoe"
-        }
-      },
-      "Post": {
-        "type": "object",
-        "properties": {
-          "_id": { "type": "string" },
-          "title": { "type": "string" },
-          "content": { "type": "string" },
-          "created_at": { "type": "string", "format": "date-time" },
-          "author": { "$ref": "#/components/schemas/User" }
-        },
-        "example": {
-          "_id": "60af0b0b0b0b0b0b0b0b0b0b",
-          "title": "First Post",
-          "content": "This is the content of the post",
+          "nickname": "johnDoe",
           "created_at": "2020-05-01T12:34:56.789Z",
-          "author": {
-            "_id": "60af0b0a0a0a0a0a0a0a0a0a",
-            "nickname": "johnDoe"
-          }
-        }
-      },
-      "Comment": {
-        "type": "object",
-        "properties": {
-          "_id": { "type": "string" },
-          "content": { "type": "string" },
-          "created_at": { "type": "string", "format": "date-time" },
-          "post_id": { "type": "string" },
-          "author": { "$ref": "#/components/schemas/User" }
-        },
-        "example": {
-          "_id": "60af0b0c0c0c0c0c0c0c0c0c",
-          "content": "Nice post!",
-          "created_at": "2020-05-01T13:34:56.789Z",
-          "post_id": "60af0b0b0b0b0b0b0b0b0b0b",
-          "author": {
-            "_id": "60af0b0a0a0a0a0a0a0a0a0a",
-            "nickname": "johnDoe"
-          }
+          "updated_at": "2020-05-01T12:34:56.789Z"
         }
       },
       "RegisterRequest": {
@@ -815,6 +840,23 @@
         },
         "required": ["nickname", "password", "confirmPassword"]
       },
+      "RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "Success" },
+          "data": { "$ref": "#/components/schemas/User" }
+        }
+      },
+      "DuplicateNicknameResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "This is a duplicate nickname"
+          }
+        }
+      },
       "LoginRequest": {
         "type": "object",
         "properties": {
@@ -822,6 +864,45 @@
           "password": { "type": "string" }
         },
         "required": ["nickname", "password"]
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer" },
+          "message": { "type": "string" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "tokenType": { "type": "string" },
+              "expiresIn": { "type": "integer" },
+              "accessToken": { "type": "string" }
+            }
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "author": { "$ref": "#/components/schemas/User" }
+        },
+        "example": {
+          "_id": "60af0b0b0b0b0b0b0b0b0b0b",
+          "title": "First Post",
+          "content": "This is the content of the post",
+          "created_at": "2020-05-01T12:34:56.789Z",
+          "updated_at": "2020-05-02T12:34:56.789Z",
+          "author": {
+            "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+            "nickname": "johnDoe",
+            "created_at": "2020-05-01T12:34:56.789Z",
+            "updated_at": "2020-05-01T12:34:56.789Z"
+          }
+        }
       },
       "PostRequest": {
         "type": "object",
@@ -831,12 +912,74 @@
         },
         "required": ["title", "content"]
       },
+      "PostResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "Success" },
+          "data": { "$ref": "#/components/schemas/Post" }
+        }
+      },
+      "PostsResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "Success" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Post" }
+          }
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "content": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "post_id": { "type": "string" },
+          "author": { "$ref": "#/components/schemas/User" }
+        },
+        "example": {
+          "_id": "60af0b0c0c0c0c0c0c0c0c0c",
+          "content": "Nice post!",
+          "created_at": "2020-05-01T13:34:56.789Z",
+          "updated_at": "2020-05-02T13:34:56.789Z",
+          "post_id": "60af0b0b0b0b0b0b0b0b0b0b",
+          "author": {
+            "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+            "nickname": "johnDoe",
+            "created_at": "2020-05-01T12:34:56.789Z",
+            "updated_at": "2020-05-01T12:34:56.789Z"
+          }
+        }
+      },
       "CommentRequest": {
         "type": "object",
         "properties": {
           "content": { "type": "string", "minLength": 1 }
         },
         "required": ["content"]
+      },
+      "CommentResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "Success" },
+          "data": { "$ref": "#/components/schemas/Comment" }
+        }
+      },
+      "CommentsResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "Success" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Comment" }
+          }
+        }
       },
       "SuccessResponse": {
         "type": "object",
@@ -872,59 +1015,6 @@
           },
           "SameAsPrevious": {
             "value": { "code": 6, "message": "Same as previous value" }
-          }
-        }
-      },
-      "LoginResponse": {
-        "type": "object",
-        "properties": {
-          "code": { "type": "integer" },
-          "message": { "type": "string" },
-          "data": {
-            "type": "object",
-            "properties": {
-              "tokenType": { "type": "string" },
-              "expiresIn": { "type": "integer" },
-              "accessToken": { "type": "string" }
-            }
-          }
-        }
-      },
-      "PostResponse": {
-        "type": "object",
-        "properties": {
-          "code": { "type": "integer", "example": 1 },
-          "message": { "type": "string", "example": "Success" },
-          "data": { "$ref": "#/components/schemas/Post" }
-        }
-      },
-      "PostsResponse": {
-        "type": "object",
-        "properties": {
-          "code": { "type": "integer", "example": 1 },
-          "message": { "type": "string", "example": "Success" },
-          "data": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/Post" }
-          }
-        }
-      },
-      "CommentResponse": {
-        "type": "object",
-        "properties": {
-          "code": { "type": "integer", "example": 1 },
-          "message": { "type": "string", "example": "Success" },
-          "data": { "$ref": "#/components/schemas/Comment" }
-        }
-      },
-      "CommentsResponse": {
-        "type": "object",
-        "properties": {
-          "code": { "type": "integer", "example": 1 },
-          "message": { "type": "string", "example": "Success" },
-          "data": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/Comment" }
           }
         }
       }
