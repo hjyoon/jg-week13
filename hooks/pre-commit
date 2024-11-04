@@ -1,5 +1,13 @@
 #!/bin/sh
 
+npm test
+test_status=$?
+
+if [ $test_status -ne 0 ]; then
+    echo "Tests failed. Commit aborted."
+    exit 1
+fi
+
 FILE=".env"
 
 if git diff --cached --name-only | grep -q "$FILE"; then
