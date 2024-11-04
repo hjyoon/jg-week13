@@ -44,6 +44,7 @@ router.post("/register", async (req, res, next) => {
       nickname,
       password: passwordHash,
       salt,
+      created_at: new Date(),
     });
     await newUser.save();
 
