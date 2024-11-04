@@ -25,9 +25,9 @@ const postIdSchema = Joi.object({
 router.get("/", async (req, res, next) => {
   try {
     const posts = await Post.find()
-      .populate("user_id", "nickname")
+      .populate("author", "nickname")
       .sort({ created_at: -1 })
-      .select("title content created_at user_id");
+      .select("title content created_at");
     res.status(200).json(buildResponse(CODE_1, { data: posts }));
   } catch (e) {
     next(e);
@@ -47,7 +47,7 @@ router.post("/", checkToken, async (req, res, next) => {
     const post = new Post({
       title,
       content,
-      user_id,
+      author: user_id,
       created_at: new Date(),
     });
     await post.save();
@@ -67,8 +67,8 @@ router.get("/:post_id", async (req, res, next) => {
 
   try {
     const post = await Post.findById(post_id)
-      .populate("user_id", "nickname")
-      .select("title content created_at user_id");
+      .populate("author", "nickname")
+      .select("title content created_at");
     if (!post) {
       return resNotFound(res);
     }
@@ -100,7 +100,7 @@ router.put("/:post_id", checkToken, async (req, res, next) => {
       return resNotFound(res);
     }
 
-    if (post.user_id.toString() !== user_id) {
+    if (post.author.toString() !== user_id) {
       return res.status(403).json(CODE_4);
     }
 
@@ -126,7 +126,7 @@ router.delete("/:post_id", checkToken, async (req, res, next) => {
     const post = await Post.findById(post_id);
     if (!post) return resNotFound(res);
 
-    if (post.user_id.toString() !== user_id) {
+    if (post.author.toString() !== user_id) {
       return res.status(403).json(CODE_4);
     }
 

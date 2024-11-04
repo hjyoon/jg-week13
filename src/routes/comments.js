@@ -40,9 +40,9 @@ router.get("/", async (req, res, next) => {
 
   try {
     const comments = await Comment.find({ post_id })
-      .populate("user_id", "nickname")
+      .populate("author", "nickname")
       .sort({ created_at: -1 })
-      .select("content created_at user_id");
+      .select("content created_at");
     res.status(200).json(buildResponse(CODE_1, { data: comments }));
   } catch (e) {
     next(e);
@@ -69,7 +69,7 @@ router.post("/", checkToken, async (req, res, next) => {
     const comment = new Comment({
       content,
       post_id,
-      user_id,
+      author: user_id,
       created_at: new Date(),
     });
     await comment.save();
@@ -105,7 +105,7 @@ router.put("/:comment_id", checkToken, async (req, res, next) => {
     if (!comment) {
       return resNotFound(res);
     }
-    if (comment.user_id.toString() !== user_id) {
+    if (comment.author.toString() !== user_id) {
       return res.status(403).json(CODE_4);
     }
     comment.content = content;
@@ -137,7 +137,7 @@ router.delete("/:comment_id", checkToken, async (req, res, next) => {
       return resNotFound(res);
     }
 
-    if (comment.user_id.toString() !== user_id) {
+    if (comment.author.toString() !== user_id) {
       return res.status(403).json(CODE_4);
     }
 
