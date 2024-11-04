@@ -44,11 +44,19 @@ router.post("/register", async (req, res, next) => {
       nickname,
       password: passwordHash,
       salt,
-      created_at: new Date(),
     });
     await newUser.save();
 
-    res.status(201).json(CODE_1);
+    res.status(201).json(
+      buildResponse(CODE_1, {
+        data: {
+          _id: newUser._id,
+          nickname: newUser.nickname,
+          created_at: newUser.created_at,
+          updated_at: newUser.updated_at,
+        },
+      })
+    );
   } catch (e) {
     next(e);
   }
