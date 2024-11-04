@@ -118,7 +118,17 @@ router.put("/:post_id", checkToken, async (req, res, next) => {
     post.title = title;
     post.content = content;
     await post.save();
-    res.status(200).json(CODE_1);
+    res.status(200).json(
+      buildResponse(CODE_1, {
+        data: {
+          _id: post._id,
+          title: post.title,
+          content: post.content,
+          created_at: post.created_at,
+          author: post.author,
+        },
+      })
+    );
   } catch (e) {
     next(e);
   }

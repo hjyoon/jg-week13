@@ -41,6 +41,7 @@ router.get("/", async (req, res, next) => {
   try {
     const comments = await Comment.find({ post: post_id })
       .populate("author", "nickname")
+      .populate("post", "_id")
       .sort({ created_at: -1 })
       .select("content created_at");
     res.status(200).json(buildResponse(CODE_1, { data: comments }));
@@ -122,7 +123,17 @@ router.put("/:comment_id", checkToken, async (req, res, next) => {
     }
     comment.content = content;
     await comment.save();
-    res.status(200).json(CODE_1);
+    res.status(200).json(
+      buildResponse(CODE_1, {
+        data: {
+          _id: comment._id,
+          content: comment.content,
+          created_at: comment.created_at,
+          author: comment.author,
+          post: comment.post,
+        },
+      })
+    );
   } catch (e) {
     next(e);
   }
