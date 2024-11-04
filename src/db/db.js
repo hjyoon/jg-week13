@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import { MONGO_URI } from "../config/const.js";
+import { MONGO_URI, NODE_ENV, TEST_MONGO_URI } from "../config/const.js";
 
 export async function connectToMongoDB() {
   try {
-    await mongoose.connect(MONGO_URI);
+    await mongoose.connect(NODE_ENV === "test" ? TEST_MONGO_URI : MONGO_URI);
     console.log("Mongoose connected to MongoDB");
   } catch (error) {
     console.error("MongoDB connection error:", error);
