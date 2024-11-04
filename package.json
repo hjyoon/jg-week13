@@ -8,7 +8,7 @@
     "start:local": "cross-env NODE_ENV=local node --watch index.js",
     "start:dev": "cross-env NODE_ENV=dev node --watch index.js",
     "start:prod": "cross-env NODE_ENV=production node --watch index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cross-env NODE_ENV=test node --test"
   },
   "author": "Hyojeon Yoon",
   "license": "ISC",
@@ -22,6 +22,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.0",
     "morgan": "^1.10.0",
+    "supertest": "^7.0.0",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
