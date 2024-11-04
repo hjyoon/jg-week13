@@ -39,7 +39,7 @@ router.get("/", async (req, res, next) => {
   const { post_id } = req.params;
 
   try {
-    const comments = await Comment.find({ post_id })
+    const comments = await Comment.find({ post: post_id })
       .populate("author", "nickname")
       .sort({ created_at: -1 })
       .select("content created_at");
@@ -68,12 +68,24 @@ router.post("/", checkToken, async (req, res, next) => {
   try {
     const comment = new Comment({
       content,
-      post_id,
+      post: post_id,
       author: user_id,
       created_at: new Date(),
     });
     await comment.save();
-    res.status(201).json(CODE_1);
+    await comment.populate("author", "nickname");
+    await comment.populate("post", "_id");
+    res.status(201).json(
+      buildResponse(CODE_1, {
+        data: {
+          _id: comment._id,
+          content: comment.content,
+          created_at: comment.created_at,
+          author: comment.author,
+          post: comment.post,
+        },
+      })
+    );
   } catch (e) {
     next(e);
   }
@@ -101,7 +113,7 @@ router.put("/:comment_id", checkToken, async (req, res, next) => {
   const user_id = req.locals.decodedToken.userId;
 
   try {
-    const comment = await Comment.findOne({ _id: comment_id, post_id });
+    const comment = await Comment.findOne({ _id: comment_id, post: post_id });
     if (!comment) {
       return resNotFound(res);
     }
@@ -132,7 +144,7 @@ router.delete("/:comment_id", checkToken, async (req, res, next) => {
   const user_id = req.locals.decodedToken.userId;
 
   try {
-    const comment = await Comment.findOne({ _id: comment_id, post_id });
+    const comment = await Comment.findOne({ _id: comment_id, post: post_id });
     if (!comment) {
       return resNotFound(res);
     }
@@ -141,7 +153,7 @@ router.delete("/:comment_id", checkToken, async (req, res, next) => {
       return res.status(403).json(CODE_4);
     }
 
-    await Comment.deleteOne({ _id: comment_id, post_id });
+    await Comment.deleteOne({ _id: comment_id, post: post_id });
     noContent(res);
   } catch (e) {
     next(e);

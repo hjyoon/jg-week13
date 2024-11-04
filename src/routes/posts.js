@@ -51,7 +51,18 @@ router.post("/", checkToken, async (req, res, next) => {
       created_at: new Date(),
     });
     await post.save();
-    res.status(201).json(CODE_1);
+    await post.populate("author", "nickname");
+    res.status(201).json(
+      buildResponse(CODE_1, {
+        data: {
+          _id: post._id,
+          title: post.title,
+          content: post.content,
+          created_at: post.created_at,
+          author: post.author,
+        },
+      })
+    );
   } catch (e) {
     next(e);
   }
