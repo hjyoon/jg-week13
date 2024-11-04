@@ -145,8 +145,10 @@ router.delete("/:post_id", checkToken, async (req, res, next) => {
   const user_id = req.locals.decodedToken.userId;
 
   try {
-    const post = await Post.findById(post_id);
-    if (!post) return resNotFound(res);
+    const post = await Post.findOne({ _id: post_id, deleted_at: null });
+    if (!post) {
+      return resNotFound(res);
+    }
 
     if (post.author.toString() !== user_id) {
       return res.status(403).json(CODE_4);
