@@ -24,7 +24,7 @@ const postIdSchema = Joi.object({
 
 router.get("/", async (req, res, next) => {
   try {
-    const posts = await Post.find()
+    const posts = await Post.find({ deleted_at: null })
       .populate("author", "nickname")
       .sort({ created_at: -1 })
       .select("title content created_at");
@@ -77,7 +77,7 @@ router.get("/:post_id", async (req, res, next) => {
   const { post_id } = req.params;
 
   try {
-    const post = await Post.findById(post_id)
+    const post = await Post.findOne({ _id: post_id, deleted_at: null })
       .populate("author", "nickname")
       .select("title content created_at");
     if (!post) {
@@ -106,7 +106,7 @@ router.put("/:post_id", checkToken, async (req, res, next) => {
   const user_id = req.locals.decodedToken.userId;
 
   try {
-    const post = await Post.findById(post_id);
+    const post = await Post.findOne({ _id: post_id, deleted_at: null });
     if (!post) {
       return resNotFound(res);
     }
@@ -152,7 +152,8 @@ router.delete("/:post_id", checkToken, async (req, res, next) => {
       return res.status(403).json(CODE_4);
     }
 
-    await post.deleteOne({ _id: post_id });
+    post.deleted_at = Date.now();
+    await post.save();
     noContent(res);
   } catch (e) {
     next(e);

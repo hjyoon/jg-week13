@@ -14,10 +14,11 @@ const commentSchema = new mongoose.Schema({
   },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
+  deleted_at: { type: Date, default: null },
 });
 
 commentSchema.pre("save", function (next) {
-  if (this.isModified()) {
+  if (this.isModified() && !this.deleted_at) {
     this.updated_at = Date.now();
   }
   next();

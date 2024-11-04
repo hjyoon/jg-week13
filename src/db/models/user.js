@@ -6,10 +6,11 @@ const userSchema = new mongoose.Schema({
   salt: { type: String, required: true },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
+  deleted_at: { type: Date, default: null },
 });
 
 userSchema.pre("save", function (next) {
-  if (this.isModified()) {
+  if (this.isModified() && !this.deleted_at) {
     this.updated_at = Date.now();
   }
   next();

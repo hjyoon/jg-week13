@@ -39,7 +39,7 @@ router.get("/", async (req, res, next) => {
   const { post_id } = req.params;
 
   try {
-    const comments = await Comment.find({ post: post_id })
+    const comments = await Comment.find({ post: post_id, deleted_at: null })
       .populate("author", "nickname")
       .populate("post", "_id")
       .sort({ created_at: -1 })
@@ -114,7 +114,11 @@ router.put("/:comment_id", checkToken, async (req, res, next) => {
   const user_id = req.locals.decodedToken.userId;
 
   try {
-    const comment = await Comment.findOne({ _id: comment_id, post: post_id });
+    const comment = await Comment.findOne({
+      _id: comment_id,
+      post: post_id,
+      deleted_at: null,
+    });
     if (!comment) {
       return resNotFound(res);
     }
@@ -156,7 +160,11 @@ router.delete("/:comment_id", checkToken, async (req, res, next) => {
   const user_id = req.locals.decodedToken.userId;
 
   try {
-    const comment = await Comment.findOne({ _id: comment_id, post: post_id });
+    const comment = await Comment.findOne({
+      _id: comment_id,
+      post: post_id,
+      deleted_at: null,
+    });
     if (!comment) {
       return resNotFound(res);
     }
@@ -165,7 +173,8 @@ router.delete("/:comment_id", checkToken, async (req, res, next) => {
       return res.status(403).json(CODE_4);
     }
 
-    await Comment.deleteOne({ _id: comment_id, post: post_id });
+    comment.deleted_at = Date.now();
+    await comment.save();
     noContent(res);
   } catch (e) {
     next(e);
