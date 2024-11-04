@@ -23,15 +23,33 @@
             "description": "User registered successfully",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" },
+                "example": {
+                  "code": 1,
+                  "message": "Success"
+                }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad Request or Duplicate Nickname",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "DuplicateNickname": {
+                    "value": {
+                      "code": 3,
+                      "message": "This is a duplicate nickname"
+                    }
+                  },
+                  "ValidationError": {
+                    "value": {
+                      "code": 3,
+                      "message": "Wrong parameter format"
+                    }
+                  }
+                }
               }
             }
           }
@@ -55,7 +73,16 @@
             "description": "Login successful",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/LoginResponse" }
+                "schema": { "$ref": "#/components/schemas/LoginResponse" },
+                "example": {
+                  "code": 1,
+                  "message": "Success",
+                  "data": {
+                    "tokenType": "Bearer",
+                    "expiresIn": 3600,
+                    "accessToken": "eyJhbGciOiJIUzI1NiIsInR..."
+                  }
+                }
               }
             },
             "headers": {
@@ -68,10 +95,24 @@
             }
           },
           "400": {
-            "description": "Invalid credentials",
+            "description": "Invalid credentials or Validation Error",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "InvalidCredentials": {
+                    "value": {
+                      "code": 4,
+                      "message": "Invalid credentials"
+                    }
+                  },
+                  "ValidationError": {
+                    "value": {
+                      "code": 3,
+                      "message": "Wrong parameter format"
+                    }
+                  }
+                }
               }
             }
           }
@@ -88,8 +129,35 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/Post" }
+                  "$ref": "#/components/schemas/PostsResponse"
+                },
+                "example": {
+                  "code": 1,
+                  "message": "Success",
+                  "data": [
+                    {
+                      "_id": "60af0b0b0b0b0b0b0b0b0b0b",
+                      "title": "First Post",
+                      "content": "This is the content of the post",
+                      "created_at": "2020-05-01T12:34:56.789Z",
+                      "author": {
+                        "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+                        "nickname": "johnDoe"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 0,
+                  "message": "Fail"
                 }
               }
             }
@@ -113,15 +181,33 @@
             "description": "Post created",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+                "schema": { "$ref": "#/components/schemas/PostResponse" },
+                "example": {
+                  "code": 1,
+                  "message": "Success",
+                  "data": {
+                    "_id": "60af0b0b0b0b0b0b0b0b0b0b",
+                    "title": "First Post",
+                    "content": "This is the content of the post",
+                    "created_at": "2020-05-01T12:34:56.789Z",
+                    "author": {
+                      "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+                      "nickname": "johnDoe"
+                    }
+                  }
+                }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 3,
+                  "message": "Wrong parameter format"
+                }
               }
             }
           },
@@ -129,7 +215,11 @@
             "description": "Unauthorized",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 4,
+                  "message": "Invalid credentials"
+                }
               }
             }
           }
@@ -153,7 +243,33 @@
             "description": "Post found",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Post" }
+                "schema": { "$ref": "#/components/schemas/PostResponse" },
+                "example": {
+                  "code": 1,
+                  "message": "Success",
+                  "data": {
+                    "_id": "60af0b0b0b0b0b0b0b0b0b0b",
+                    "title": "First Post",
+                    "content": "This is the content of the post",
+                    "created_at": "2020-05-01T12:34:56.789Z",
+                    "author": {
+                      "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+                      "nickname": "johnDoe"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Post ID",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 3,
+                  "message": "Wrong parameter format"
+                }
               }
             }
           },
@@ -161,7 +277,11 @@
             "description": "Post not found",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 0,
+                  "message": "Fail"
+                }
               }
             }
           }
@@ -192,15 +312,33 @@
             "description": "Post updated",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" },
+                "example": {
+                  "code": 1,
+                  "message": "Success"
+                }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation Error or Invalid Post ID",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "ValidationError": {
+                    "value": {
+                      "code": 3,
+                      "message": "Wrong parameter format"
+                    }
+                  },
+                  "InvalidPostID": {
+                    "value": {
+                      "code": 3,
+                      "message": "Wrong parameter format"
+                    }
+                  }
+                }
               }
             }
           },
@@ -208,7 +346,11 @@
             "description": "Forbidden",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 4,
+                  "message": "Invalid credentials"
+                }
               }
             }
           },
@@ -216,7 +358,11 @@
             "description": "Post not found",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 0,
+                  "message": "Fail"
+                }
               }
             }
           }
@@ -238,11 +384,27 @@
           "204": {
             "description": "Post deleted"
           },
+          "400": {
+            "description": "Invalid Post ID",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 3,
+                  "message": "Wrong parameter format"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 4,
+                  "message": "Invalid credentials"
+                }
               }
             }
           },
@@ -250,7 +412,11 @@
             "description": "Post not found",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 0,
+                  "message": "Fail"
+                }
               }
             }
           }
@@ -275,17 +441,48 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/Comment" }
+                  "$ref": "#/components/schemas/CommentsResponse"
+                },
+                "example": {
+                  "code": 1,
+                  "message": "Success",
+                  "data": [
+                    {
+                      "_id": "60af0b0c0c0c0c0c0c0c0c0c",
+                      "content": "Nice post!",
+                      "created_at": "2020-05-01T13:34:56.789Z",
+                      "post_id": "60af0b0b0b0b0b0b0b0b0b0b",
+                      "author": {
+                        "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+                        "nickname": "johnDoe"
+                      }
+                    }
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Invalid Post ID",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 3,
+                  "message": "Wrong parameter format"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 0,
+                  "message": "Fail"
+                }
               }
             }
           }
@@ -316,15 +513,43 @@
             "description": "Comment created",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+                "schema": { "$ref": "#/components/schemas/CommentResponse" },
+                "example": {
+                  "code": 1,
+                  "message": "Success",
+                  "data": {
+                    "_id": "60af0b0c0c0c0c0c0c0c0c0c",
+                    "content": "Nice post!",
+                    "created_at": "2020-05-01T13:34:56.789Z",
+                    "post_id": "60af0b0b0b0b0b0b0b0b0b0b",
+                    "author": {
+                      "_id": "60af0b0a0a0a0a0a0a0a0a0a",
+                      "nickname": "johnDoe"
+                    }
+                  }
+                }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation Error or Invalid Post ID",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "ValidationError": {
+                    "value": {
+                      "code": 3,
+                      "message": "Wrong parameter format"
+                    }
+                  },
+                  "InvalidPostID": {
+                    "value": {
+                      "code": 3,
+                      "message": "Wrong parameter format"
+                    }
+                  }
+                }
               }
             }
           },
@@ -332,7 +557,11 @@
             "description": "Unauthorized",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 4,
+                  "message": "Invalid credentials"
+                }
               }
             }
           }
@@ -371,15 +600,23 @@
             "description": "Comment updated",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" },
+                "example": {
+                  "code": 1,
+                  "message": "Success"
+                }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation Error or Invalid IDs",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 3,
+                  "message": "Wrong parameter format"
+                }
               }
             }
           },
@@ -387,7 +624,11 @@
             "description": "Forbidden",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 4,
+                  "message": "Invalid credentials"
+                }
               }
             }
           },
@@ -395,7 +636,11 @@
             "description": "Comment not found",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 0,
+                  "message": "Fail"
+                }
               }
             }
           }
@@ -423,11 +668,27 @@
           "204": {
             "description": "Comment deleted"
           },
+          "400": {
+            "description": "Invalid IDs",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 3,
+                  "message": "Wrong parameter format"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 4,
+                  "message": "Invalid credentials"
+                }
               }
             }
           },
@@ -435,7 +696,11 @@
             "description": "Comment not found",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": {
+                  "code": 0,
+                  "message": "Fail"
+                }
               }
             }
           }
@@ -504,14 +769,14 @@
           "title": { "type": "string" },
           "content": { "type": "string" },
           "created_at": { "type": "string", "format": "date-time" },
-          "user_id": { "$ref": "#/components/schemas/User" }
+          "author": { "$ref": "#/components/schemas/User" }
         },
         "example": {
           "_id": "60af0b0b0b0b0b0b0b0b0b0b",
           "title": "First Post",
           "content": "This is the content of the post",
           "created_at": "2020-05-01T12:34:56.789Z",
-          "user_id": {
+          "author": {
             "_id": "60af0b0a0a0a0a0a0a0a0a0a",
             "nickname": "johnDoe"
           }
@@ -524,14 +789,14 @@
           "content": { "type": "string" },
           "created_at": { "type": "string", "format": "date-time" },
           "post_id": { "type": "string" },
-          "user_id": { "$ref": "#/components/schemas/User" }
+          "author": { "$ref": "#/components/schemas/User" }
         },
         "example": {
           "_id": "60af0b0c0c0c0c0c0c0c0c0c",
           "content": "Nice post!",
           "created_at": "2020-05-01T13:34:56.789Z",
           "post_id": "60af0b0b0b0b0b0b0b0b0b0b",
-          "user_id": {
+          "author": {
             "_id": "60af0b0a0a0a0a0a0a0a0a0a",
             "nickname": "johnDoe"
           }
@@ -540,7 +805,11 @@
       "RegisterRequest": {
         "type": "object",
         "properties": {
-          "nickname": { "type": "string", "minLength": 3 },
+          "nickname": {
+            "type": "string",
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9]+$"
+          },
           "password": { "type": "string", "minLength": 4 },
           "confirmPassword": { "type": "string" }
         },
@@ -572,25 +841,44 @@
       "SuccessResponse": {
         "type": "object",
         "properties": {
-          "code": { "type": "string", "example": "CODE_1" },
+          "code": { "type": "integer", "example": 1 },
           "message": { "type": "string", "example": "Success" }
         }
       },
       "ErrorResponse": {
         "type": "object",
         "properties": {
-          "code": { "type": "string" },
+          "code": { "type": "integer" },
           "message": { "type": "string" }
         },
-        "example": {
-          "code": "CODE_3",
-          "message": "Validation error"
+        "examples": {
+          "Fail": {
+            "value": { "code": 0, "message": "Fail" }
+          },
+          "RequiredParameters": {
+            "value": {
+              "code": 2,
+              "message": "Required parameters not satisfied"
+            }
+          },
+          "WrongParameterFormat": {
+            "value": { "code": 3, "message": "Wrong parameter format" }
+          },
+          "InvalidCredentials": {
+            "value": { "code": 4, "message": "Invalid credentials" }
+          },
+          "NotAvailable": {
+            "value": { "code": 5, "message": "Not currently available" }
+          },
+          "SameAsPrevious": {
+            "value": { "code": 6, "message": "Same as previous value" }
+          }
         }
       },
       "LoginResponse": {
         "type": "object",
         "properties": {
-          "code": { "type": "string" },
+          "code": { "type": "integer" },
           "message": { "type": "string" },
           "data": {
             "type": "object",
@@ -600,14 +888,43 @@
               "accessToken": { "type": "string" }
             }
           }
-        },
-        "example": {
-          "code": "CODE_1",
-          "message": "Success",
+        }
+      },
+      "PostResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "Success" },
+          "data": { "$ref": "#/components/schemas/Post" }
+        }
+      },
+      "PostsResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "Success" },
           "data": {
-            "tokenType": "Bearer",
-            "expiresIn": 3600,
-            "accessToken": "eyJhbGciOiJIUzI1NiIsInR..."
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Post" }
+          }
+        }
+      },
+      "CommentResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "Success" },
+          "data": { "$ref": "#/components/schemas/Comment" }
+        }
+      },
+      "CommentsResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "Success" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Comment" }
           }
         }
       }
